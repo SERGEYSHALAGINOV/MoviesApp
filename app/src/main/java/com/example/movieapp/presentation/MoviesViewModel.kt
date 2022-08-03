@@ -77,6 +77,6 @@ class MoviesViewModel @Inject constructor(
 
     companion object {
         private const val NUMBER_ITEMS_PER_PAGE = 20
-        private const val FIRST_OFFSET = 500
+        private const val FIRST_OFFSET = 0
     }
 }
