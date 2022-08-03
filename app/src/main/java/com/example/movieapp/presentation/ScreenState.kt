@@ -1,4 +1,4 @@
-package com.example.movieapp.domain.models
+package com.example.movieapp.presentation
 
 sealed class ScreenState {
 

@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.movieapp.databinding.ItemMoviesBinding
 import com.example.movieapp.databinding.ItemMoviesLoadingBinding
+import com.example.movieapp.databinding.ItemMoviesTooManyRequestsBinding
 import com.example.movieapp.domain.models.Movies
 import javax.inject.Inject
 
@@ -13,6 +14,9 @@ class MoviesListAdapter @Inject constructor(
     callback: MoviesItemDiffCallback,
 ) :
     ListAdapter<ListItem, RecyclerView.ViewHolder>(callback) {
+
+    lateinit var tryAgainLoadAllMovies: (() -> Unit)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
 
@@ -21,25 +25,41 @@ class MoviesListAdapter @Inject constructor(
                 MoviesItemViewHolder(ItemMoviesBinding.inflate(inflater, parent, false))
             VIEW_TYPE_LOADER ->
                 LoaderViewHolder(ItemMoviesLoadingBinding.inflate(inflater, parent, false))
+            VIEW_TYPE_TOO_MANY_REQUEST ->
+                TooManyRequestViewHolder(
+                    ItemMoviesTooManyRequestsBinding.inflate(
+                        inflater,
+                        parent,
+                        false
+                    )
+                )
             else -> throw RuntimeException("Unknown view type: $viewType")
         }
     }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
         when (val moviesItem = getItem(position)) {
-            is ListItem.Movies -> (viewHolder as MoviesItemViewHolder).bind(
+            is ListItem.MoviesItem -> (viewHolder as MoviesItemViewHolder).bind(
                 moviesItem
             )
             is ListItem.Loader -> (viewHolder as LoaderViewHolder).bind()
+            is ListItem.TooManyRequest -> (viewHolder as TooManyRequestViewHolder).bind(
+                tryAgainLoadAllMovies
+            )
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        val moviesItem = getItem(position)
-        return if (moviesItem == ListItem.Loader) {
-            VIEW_TYPE_LOADER
-        } else {
-            VIEW_TYPE_ITEM
+        return when (getItem(position)) {
+            ListItem.Loader -> {
+                VIEW_TYPE_LOADER
+            }
+            ListItem.TooManyRequest -> {
+                VIEW_TYPE_TOO_MANY_REQUEST
+            }
+            else -> {
+                VIEW_TYPE_ITEM
+            }
         }
     }
 
@@ -53,11 +73,17 @@ class MoviesListAdapter @Inject constructor(
         }
     }
 
-    fun removeLoader() {
+    fun createTooManyRequest() {
+        val listMut: MutableList<ListItem> = currentList.toMutableList()
         if (currentList[currentList.lastIndex] == ListItem.Loader) {
-            val listMut: MutableList<ListItem> = currentList.toMutableList()
             listMut.removeLast()
-            submitList(listMut)
+            if (currentList[currentList.lastIndex - 1] != ListItem.TooManyRequest) {
+                listMut.add(ListItem.TooManyRequest)
+                submitList(listMut)
+            } else {
+                submitList(listMut)
+                return
+            }
         } else {
             return
         }
@@ -66,5 +92,6 @@ class MoviesListAdapter @Inject constructor(
     companion object {
         const val VIEW_TYPE_ITEM = 1
         const val VIEW_TYPE_LOADER = 2
+        const val VIEW_TYPE_TOO_MANY_REQUEST = 3
     }
 }

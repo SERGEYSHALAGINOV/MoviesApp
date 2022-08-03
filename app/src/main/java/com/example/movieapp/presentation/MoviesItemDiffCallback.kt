@@ -5,11 +5,15 @@ import javax.inject.Inject
 
 class MoviesItemDiffCallback @Inject constructor() : DiffUtil.ItemCallback<ListItem>() {
     override fun areItemsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
-        return if (oldItem == ListItem.Loader || newItem == ListItem.Loader) {
+        return if (isLoaderOrTooManyRequest(oldItem, newItem)) {
             false
         } else {
-            if (oldItem is ListItem.Movies && newItem is ListItem.Movies) {
-                oldItem.displayTitle == newItem.displayTitle
+            if (oldItem is ListItem.MoviesItem && newItem is ListItem.MoviesItem) {
+                if (oldItem.displayTitle.isNullOrEmpty() || newItem.displayTitle.isNullOrEmpty()) {
+                    false
+                } else {
+                    oldItem.displayTitle == newItem.displayTitle
+                }
             } else {
                 false
             }
@@ -19,6 +23,12 @@ class MoviesItemDiffCallback @Inject constructor() : DiffUtil.ItemCallback<ListI
     override fun areContentsTheSame(oldItem: ListItem, newItem: ListItem): Boolean {
         return oldItem == newItem
     }
+
+    private fun isLoaderOrTooManyRequest(
+        oldItem: ListItem, newItem: ListItem
+    ) = oldItem == ListItem.Loader
+            || newItem == ListItem.Loader || oldItem == ListItem.TooManyRequest
+            || newItem == ListItem.TooManyRequest
 }
 
 

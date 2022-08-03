@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.movieapp.R
 import com.example.movieapp.databinding.FragmentMoviesBinding
-import com.example.movieapp.domain.models.ScreenState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -35,6 +34,30 @@ class MoviesFragment : Fragment() {
     private val binding: FragmentMoviesBinding
         get() = _binding ?: throw RuntimeException("FragmentMoviesBinding == null")
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        val callback: OnBackPressedCallback =
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+
+                    if (pressedTime + 2000 > System.currentTimeMillis()) {
+                        requireActivity().finish()
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            resources.getString(R.string.on_back_pressed_text),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    pressedTime = System.currentTimeMillis()
+                }
+            }
+        requireActivity().onBackPressedDispatcher.addCallback(
+            this,
+            callback
+        )
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -45,7 +68,6 @@ class MoviesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupRecyclerView()
         isListLoading = true
 
         viewModel.screenState.observe(viewLifecycleOwner) {
@@ -72,36 +94,10 @@ class MoviesFragment : Fragment() {
                     if (!isListLoading || !isCreateLoader) {
                         return
                     }
-                    isLoadingItem = false
-                    moviesAdapter.createLoader()
-                    viewModel.loadingNextPage()
+                    loadingNextPage()
                 }
             }
         })
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        val callback: OnBackPressedCallback =
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-
-                    if (pressedTime + 2000 > System.currentTimeMillis()) {
-                        requireActivity().finish()
-                    } else {
-                        Toast.makeText(
-                            requireContext(),
-                            resources.getString(R.string.on_back_pressed_text),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    pressedTime = System.currentTimeMillis();
-                }
-            }
-        requireActivity().onBackPressedDispatcher.addCallback(
-            this,
-            callback
-        )
     }
 
     private fun showLoading(isLoading: Boolean) {
@@ -109,6 +105,7 @@ class MoviesFragment : Fragment() {
             binding.rvMoviesList.isVisible = !isLoading
             binding.loader.isVisible = isLoading
         } else {
+            isCreateLoader = true
             binding.rvMoviesList.isVisible = true
             binding.loader.isVisible = false
         }
@@ -117,14 +114,7 @@ class MoviesFragment : Fragment() {
     private fun showError(message: String, exception: String) {
         if (exception.contains(HTTP_429_TOO_MANY_REQUESTS)) {
             isCreateLoader = false
-            binding.rvMoviesList.isVisible = true
-            binding.loader.isVisible = false
-            moviesAdapter.removeLoader()
-            Toast.makeText(
-                requireContext(),
-                resources.getString(R.string.exception_429_text),
-                Toast.LENGTH_SHORT
-            ).show()
+            moviesAdapter.createTooManyRequest()
         } else {
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             binding.rvMoviesList.isVisible = false
@@ -134,6 +124,15 @@ class MoviesFragment : Fragment() {
 
     private fun setupRecyclerView() {
         binding.rvMoviesList.adapter = moviesAdapter
+        moviesAdapter.tryAgainLoadAllMovies = {
+            loadingNextPage()
+        }
+    }
+
+    private fun loadingNextPage() {
+        isLoadingItem = false
+        moviesAdapter.createLoader()
+        viewModel.loadingNextPage()
     }
 
     companion object {

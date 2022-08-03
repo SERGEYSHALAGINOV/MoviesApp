@@ -8,7 +8,7 @@ class MoviesItemViewHolder(private val binding: ItemMoviesBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
     fun bind(
-        movie: ListItem.Movies,
+        movie: ListItem.MoviesItem,
     ) {
         Glide.with(itemView.context)
             .load(movie.multimedia.src)
