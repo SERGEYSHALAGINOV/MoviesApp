@@ -1,6 +1,7 @@
-package com.example.movieapp.presentation
+package com.example.movieapp.presentation.movieslist.recycler
 
 import androidx.recyclerview.widget.DiffUtil
+import com.example.movieapp.presentation.models.ListItem
 import javax.inject.Inject
 
 class MoviesItemDiffCallback @Inject constructor() : DiffUtil.ItemCallback<ListItem>() {

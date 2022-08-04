@@ -1,4 +1,4 @@
-package com.example.movieapp.presentation
+package com.example.movieapp.presentation.movieslist.recycler
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,7 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.movieapp.databinding.ItemMoviesBinding
 import com.example.movieapp.databinding.ItemMoviesLoadingBinding
 import com.example.movieapp.databinding.ItemMoviesTooManyRequestsBinding
-import com.example.movieapp.domain.models.Movies
+import com.example.movieapp.presentation.models.ListItem
+import com.example.movieapp.presentation.movieslist.recycler.holders.LoaderViewHolder
+import com.example.movieapp.presentation.movieslist.recycler.holders.MoviesItemViewHolder
+import com.example.movieapp.presentation.movieslist.recycler.holders.TooManyRequestViewHolder
 import javax.inject.Inject
 
 class MoviesListAdapter @Inject constructor(
@@ -79,11 +82,8 @@ class MoviesListAdapter @Inject constructor(
             listMut.removeLast()
             if (currentList[currentList.lastIndex - 1] != ListItem.TooManyRequest) {
                 listMut.add(ListItem.TooManyRequest)
-                submitList(listMut)
-            } else {
-                submitList(listMut)
-                return
             }
+            submitList(listMut)
         } else {
             return
         }

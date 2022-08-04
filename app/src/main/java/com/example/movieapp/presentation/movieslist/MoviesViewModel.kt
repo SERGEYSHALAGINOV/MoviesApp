@@ -1,10 +1,12 @@
-package com.example.movieapp.presentation
+package com.example.movieapp.presentation.movieslist
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.domain.usecases.GetAllMoviesUseCase
+import com.example.movieapp.presentation.models.ListItem
+import com.example.movieapp.presentation.models.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

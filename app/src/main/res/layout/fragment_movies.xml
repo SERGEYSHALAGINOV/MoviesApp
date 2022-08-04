@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_fragments"
-    tools:context=".presentation.MoviesFragment">
+    tools:context=".presentation.movieslist.MoviesFragment">
 
     <ProgressBar
         android:id="@+id/loader"

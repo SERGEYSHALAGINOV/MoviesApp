@@ -1,8 +1,9 @@
-package com.example.movieapp.presentation
+package com.example.movieapp.presentation.movieslist.recycler.holders
 
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.movieapp.databinding.ItemMoviesBinding
+import com.example.movieapp.presentation.models.ListItem
 
 class MoviesItemViewHolder(private val binding: ItemMoviesBinding) :
     RecyclerView.ViewHolder(binding.root) {

@@ -1,4 +1,4 @@
-package com.example.movieapp.presentation
+package com.example.movieapp.presentation.movieslist.recycler.holders
 
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
